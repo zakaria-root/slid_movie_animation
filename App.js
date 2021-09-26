@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Animated } from 'react-native';
+import { Animated, useWindowDimensions } from 'react-native';
 import {
     StyleSheet,
     Text,
@@ -14,26 +14,28 @@ import Star from 'react-native-star-view';
 
 export default function App() {
 
-  const width = Dimensions.get('window').width;
-  const height = Dimensions.get('window').height;
+  const {width , height} = useWindowDimensions();
+  // const height = Dimensions.get('window').height;
   const width_image = width * 0.49;
   const height_image = height * 0.4 ;
   const ITEM_SIZE = width_image * 1.15;
   const ITEM_HEIGHT = height_image * 1.51;
+  const SPACING_SIZE = (width - ITEM_SIZE) / 2;
   const scrollx = React.useRef(new Animated.Value(0)).current;
 
   const data = [
+    {id:0 ,name : null,rating : null, genres: [null],uri : null},
     {id: 1,
     name: "P R E Y",
     rating:"8.2",
     genres: ["Aventure", "Fantastique"],
-    disc: "Prey est un jeu de type FPS, orienté action, jouable en solo orienté action, jouable en solo.",
+    disc: "Prey est un jeu de type FPS, orienté action, jouable en solo orienté action, jouable en solo jouable en solo.",
     uri: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTGfDwTQVq0HdMjiF9mzEoJsvrhXc3qcJVE1EtzRq4Wk9w7Ox5T"},
     {id: 2,
     name: "Sweet Girl",
     rating:"8.9",
     genres: ["Aventure", "Drame"],
-    disc: "Un homme jure de venger les responsables de la mort de sa femme, orienté action. ",
+    disc: "Un homme jure de venger les responsables de la mort de sa femme, orienté action , orienté action. ",
     uri: "https://fr.web.img2.acsta.net/c_310_420/pictures/21/08/04/12/34/5035523.jpg"},
     {id: 3,
     name: "The Call",
@@ -45,7 +47,7 @@ export default function App() {
     name: "SAS: Red Noticf",
     rating:"6.4",
     genres: ["Aventure", "Fantastique"],
-    disc: "Intitulé par Ruby Rose, ce thriller d’action britannique, ce thriller d’action britannique.",
+    disc: "Intitulé par Ruby Rose, ce thriller d’action britannique, ce thriller d’action britannique, ce thriller d’action.",
     uri: "https://www.cimaton.org/wp-content/uploads/2021/03/SAS-Red-Notice-2021.jpg"},
     {id: 5,
     name: "Tyler Rake",
@@ -57,19 +59,19 @@ export default function App() {
     name: "Le Roi",
     rating:"8.5",
     genres: ["Fantastique"],
-    disc: "Hal, jeune prince rebelle, tourne le dos à la royauté. tourne le dos à la royauté. ",
+    disc: "Hal, jeune prince rebelle, tourne le dos à la royauté. tourne le dos à la royauté, tourne le dos à la royauté. ",
     uri: "https://fr.web.img5.acsta.net/pictures/19/08/22/09/22/0020378.jpg"},
     {id: 7,
     name: "V E N O M",
     rating:"9.5",
     genres: ["Fantastique", "d'horreur"],
-    disc: "Depuis la sortie du premier volet de Venom, les fans du MCU espèrent les fans du MCU espèrent",
+    disc: "Depuis la sortie du premier volet de Venom, les fans du MCU espèrent les fans du MCU espèrent.",
     uri: "https://www.aleqt.com/sites/default/files/styles/scale_660/public/rbitem/2018/09/13/903721-1774303301.jpg?itok=dcb_TBfJ"},
     {id: 8,
     name: "The Old Guard",
     rating:"7.5",
     genres: ["Fantastique"],
-    disc: "Une petite bande soudée de mercenaires immortels, soudée de mercenaires immortels",
+    disc: "Une petite bande soudée de mercenaires immortels, soudée de mercenaires immortels.",
     uri: "https://fr.web.img4.acsta.net/pictures/20/05/26/09/44/5988886.jpg"},
     {id: 9,
     name: "Bird Box eBook",
@@ -95,7 +97,7 @@ export default function App() {
       contentContainerStyle={{ 
         alignItems: 'center' 
       }}
-      snapToInterval={ITEM_SIZE + 20}
+      snapToInterval={ITEM_SIZE + 22}
       decelerationRate={0}
       onScroll={Animated.event(
         [{nativeEvent : {contentOffset : { x :scrollx}}}],
@@ -106,7 +108,7 @@ export default function App() {
 
         const genres = item.genres.map(genre => {
           return(
-            <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "gray", margin: 4}} >
+            <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "gray", margin: 4 }} >
               <Text style={{ color:'gray', fontSize:9 }}>{genre}</Text>
             </View>
           )
@@ -114,22 +116,27 @@ export default function App() {
         })
 
         const inputRange = [
-          (index - 1) * ITEM_SIZE,
-          index * ITEM_SIZE,
-          (index + 1) * ITEM_SIZE
+          (index - 2) * (ITEM_SIZE + 22),
+          (index - 1) * (ITEM_SIZE + 22),
+          index * (ITEM_SIZE + 22),
         ]
         const translateY = scrollx.interpolate({
           inputRange,
           outputRange:[0, -50, 0]
         })
+        
+        if (!item.uri) {
+          return(<View style={{ width: SPACING_SIZE,  }} />)
+        }
+
         return(
-          
+
             <Animated.View style={{ 
             width: ITEM_SIZE, 
             height: ITEM_HEIGHT, 
             margin: 11,
             borderRadius: 30,
-            // backgroundColor: 'red',
+            backgroundColor: 'red',
             alignItems: 'center',
             justifyContent: 'center',
             transform: [{translateY}]
@@ -142,10 +149,11 @@ export default function App() {
               height: height_image, 
               // margin:20,
               borderRadius: 30,
+              
             }}
             />
             
-            <View style={{ alignItems: 'center', marginTop: 8}}>
+            <View style={{ alignItems: 'center', marginTop: 8,}}>
               <Text
               style={{ 
                 fontWeight: 'bold',
@@ -171,7 +179,9 @@ export default function App() {
               {genres}
             </View>
             
-            <View style={{ paddingHorizontal: 20, paddingTop: 2}}>
+            <View style={{ 
+              paddingHorizontal: 20,
+              paddingTop: 2 }}>
               <Text style={{ alignItems: 'center', fontSize:10 }}>
               {item.disc}
               </Text>
