@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { Animated } from 'react-native';
 import {
     StyleSheet,
     Text,
@@ -12,11 +13,15 @@ import { Rating } from 'react-native-elements';
 import Star from 'react-native-star-view';
 
 export default function App() {
+
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
-
-  const width_image = width * 0.5;
+  const width_image = width * 0.49;
   const height_image = height * 0.4 ;
+  const ITEM_SIZE = width_image * 1.15;
+  const ITEM_HEIGHT = height_image * 1.51;
+  const scrollx = React.useRef(new Animated.Value(0)).current;
+
   const data = [
     {id: 1,
     name: "P R E Y",
@@ -83,14 +88,22 @@ export default function App() {
   
   return (
     <View style={styles.container}>
-      <FlatList 
+      <Animated.FlatList 
       data={data}
       keyExtractor={item => item.id}
       horizontal
       contentContainerStyle={{ 
         alignItems: 'center' 
       }}
-      renderItem={({item}) => {
+      snapToInterval={ITEM_SIZE + 20}
+      decelerationRate={0}
+      onScroll={Animated.event(
+        [{nativeEvent : {contentOffset : { x :scrollx}}}],
+        {useNativeDriver : true}
+      )}
+      scrollEventThrottle={16}
+      renderItem={({item, index}) => {
+
         const genres = item.genres.map(genre => {
           return(
             <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "gray", margin: 4}} >
@@ -99,16 +112,27 @@ export default function App() {
           )
           
         })
+
+        const inputRange = [
+          (index - 1) * ITEM_SIZE,
+          index * ITEM_SIZE,
+          (index + 1) * ITEM_SIZE
+        ]
+        const translateY = scrollx.interpolate({
+          inputRange,
+          outputRange:[0, -50, 0]
+        })
         return(
           
-            <View style={{ 
-            width:width_image * 1.15, 
-            height: height_image * 1.50, 
+            <Animated.View style={{ 
+            width: ITEM_SIZE, 
+            height: ITEM_HEIGHT, 
             margin: 11,
             borderRadius: 30,
-            backgroundColor: 'red',
+            // backgroundColor: 'red',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            transform: [{translateY}]
           }}>
             <Image 
             source={{ uri : item.uri }}
@@ -153,7 +177,7 @@ export default function App() {
               </Text>
             </View>
             
-          </View>
+          </Animated.View>
           
 
         )
