@@ -26,7 +26,8 @@ const ITEM_SIZE = width_image * 1.15;
 const ITEM_HEIGHT = height_image * 1.51;
 const SPACING_SIZE = (width - ITEM_SIZE) / 2;
 
-
+const BG ='#ff1a53';
+const ITEM ='transparent';
 
 
 const BackDrop = ({scrollx}) => {
@@ -76,7 +77,7 @@ const BackDrop = ({scrollx}) => {
     ]
       
     return(
-      <View style={{  position: 'absolute',left: 0, width, height , top: 0}} >
+      <View style={{  position: 'absolute',left: 0, width, height: height*1.2 , backgroundColor: BG}} >
             {movies.map((item,index) => {
               const inputRange = [
                 (index - 2) * (ITEM_SIZE + 22),
@@ -106,8 +107,11 @@ const BackDrop = ({scrollx}) => {
                 </Animated.View> 
               )
               })}
-
-  </View>
+            <LinearGradient 
+            colors={['transparent', BG]}
+              style={{ width, height: HEIGHT_BACKDROP  }}
+            />
+      </View>
 )
 }
 
@@ -181,6 +185,7 @@ export default function App() {
     genres: ["Aventure", "comiques"],
     disc: "Tout en postulant à plusieurs universités ,Tout en postulant à plusieurs universités. ",
     uri: "https://fr.web.img6.acsta.net/pictures/20/05/22/09/26/0527531.jpg"},
+    {id:11 ,name : null,rating : null, genres: [null],uri : null},
   ]
   
   
@@ -193,7 +198,8 @@ export default function App() {
       keyExtractor={item => item.id}
       horizontal
       contentContainerStyle={{ 
-        alignItems: 'center' 
+        alignItems: 'center',
+        marginTop: 100
       }}
       snapToInterval={ITEM_SIZE + 22}
       decelerationRate={0}
@@ -206,8 +212,8 @@ export default function App() {
 
         const genres = item.genres.map(genre => {
           return(
-            <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "gray", margin: 4 }} >
-              <Text style={{ color:'gray', fontSize:9 }}>{genre}</Text>
+            <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "#ffe6ec", margin: 4 }} >
+              <Text style={{ color:'#ffb3c6', fontSize:9 }}>{genre}</Text>
             </View>
           )
           
@@ -232,17 +238,19 @@ export default function App() {
         
 
         return(
-          
+          <View>
+            
             <Animated.View style={{ 
             width: ITEM_SIZE, 
             height: ITEM_HEIGHT, 
             margin: 11,
             borderRadius: 30,
-            backgroundColor: 'white',
             alignItems: 'center',
             justifyContent: 'center',
-            transform: [{translateY}]
+            transform: [{translateY}],
+            backgroundColor: "#f5efef"
           }}>
+            
             <Image 
             source={{ uri : item.uri }}
             
@@ -259,22 +267,26 @@ export default function App() {
               <Text
               style={{ 
                 fontWeight: 'bold',
-                fontSize: 16 
+                fontSize: 16,
+                color: '#ffe6ec' 
               }}
               >
                 {item.name}
               </Text>
             </View>
             
-            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-              <Text style={{ fontWeight: 'bold', paddingRight: 2 }}>{item.rating}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center',}}>
+              <Text style={{ fontWeight: 'bold', paddingRight: 2, 
+              color: '#ffb3c6'
+               }}>{item.rating}</Text>
               <Rating  
               type='custom' 
-              ratingColor='red'
-              ratingBackgroundColor='#c8c7c8'
+              ratingColor='#ffe6ec'
+              ratingBackgroundColor='#ffb3c6'
               imageSize={15}  
               startingValue={item.rating / 2}            
-              style={{ padding:3 }}
+              style={{ padding:3,}}
+              tintColor={'#ff4d79'}
               />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
@@ -284,13 +296,32 @@ export default function App() {
             <View style={{ 
               paddingHorizontal: 20,
               paddingTop: 2 }}>
-              <Text style={{ alignItems: 'center', fontSize:10 }}>
+              <Text style={{ alignItems: 'center', fontSize:10, color: '#ffe6ec'}}>
               {item.disc}
               </Text>
             </View>
-            
+            <LinearGradient
+          colors={[ITEM , BG, ]}
+          style={{ 
+            width: ITEM_SIZE, 
+            height : ITEM_HEIGHT , 
+            position: 'absolute', 
+            borderRadius: 30,
+            zIndex:-1
+          }}
+          />
+          <LinearGradient
+          colors={[ITEM , BG, ]}
+          style={{ 
+            width: ITEM_SIZE, 
+            height : ITEM_HEIGHT , 
+            position: 'absolute', 
+            borderRadius: 30,
+            opacity: .2,
+          }}
+          />
           </Animated.View>
-          
+          </View>
 
         )
       }}
