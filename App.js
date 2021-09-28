@@ -17,6 +17,7 @@ import { Rect } from 'react-native-svg';
 import { AntDesign } from '@expo/vector-icons'; 
 import { TouchableHighlight } from 'react-native';
 import { useEffect } from 'react';
+import { unstable_renderSubtreeIntoContainer } from 'react-dom';
 
 
 
@@ -35,6 +36,7 @@ const ITEM ='transparent';
 const LOGO  = 'https://cdn.pngsumo.com/netflix-logo-icon-of-flat-style-available-in-svg-png-eps-ai-netflix-icon-png-256_256.png';
 
 const BackDrop = ({scrollx}) => {
+      const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
       
   const movies = [
     {
@@ -98,8 +100,29 @@ const BackDrop = ({scrollx}) => {
                 inputRange,
                 outputRange:['-180deg', '0deg']
               })
-              const new_item = ITEM_SIZE +22
               
+              const translatIcon = scrollx.interpolate({
+                inputRange,
+                outputRange:[-width,0],
+              })
+              const opacityIcon = scrollx.interpolate({
+                inputRange :[
+                  (index - 2) * (ITEM_SIZE + 22),
+                  (index - 1) * (ITEM_SIZE + 22),
+                  (index ) * (ITEM_SIZE + 22),
+                ],
+                outputRange:[0,1,0],
+              })
+                const scaleIcon = scrollx.interpolate({
+                  inputRange :[
+                    (index - 2) * (ITEM_SIZE + 22),
+                    (index - 1.5) * (ITEM_SIZE + 22),
+                    (index - 1) * (ITEM_SIZE + 22),
+                    (index - 0.5) * (ITEM_SIZE + 22),
+                    (index ) * (ITEM_SIZE + 22),
+                  ],
+                  outputRange: [0,0,1.2,0,0]
+                })
             
               
               return(
@@ -117,6 +140,20 @@ const BackDrop = ({scrollx}) => {
                   style={{ width, height: HEIGHT_BACKDROP ,position: 'absolute', resizeMode: 'cover' }}
                   />
                 </Animated.View>
+                
+                <AnimatedIcon 
+                    name="caretdown" 
+                    size={35} 
+                    color="#ffe6e6"
+                    style={{ 
+                      position: 'absolute',
+                      top: HEIGHT_BACKDROP * .3,
+                      left : width /2 - 8,
+                      zIndex: 100,
+                      transform: [{translateX: translatIcon}, {scale: scaleIcon}],
+                      opacity: opacityIcon
+                  }}
+                    />
                 <View style={{ 
                   position: 'absolute', 
                   width, 
@@ -124,6 +161,7 @@ const BackDrop = ({scrollx}) => {
                   bottom: 0, 
                   
                   }}>
+                  
                     <AntDesign 
                     name="stepbackward" 
                     size={40} 
@@ -176,6 +214,14 @@ export default function App() {
   // const height = Dimensions.get('window').height;
   
   const scrollx =  React.useRef(new Animated.Value(0)).current;
+  const [pressed , setpressed] = useState(false);
+  const scale = new Animated.Value(0);
+  const scalebg = new Animated.Value(0);
+  const opacity = new Animated.Value(0.5);
+  const [counter, setcounter] = useState(-1);  
+
+  const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+  const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
 
   const data = [
     {id:0 ,name : null,rating : null, genres: [null],uri : null},
@@ -241,8 +287,10 @@ export default function App() {
     uri: "https://fr.web.img6.acsta.net/pictures/20/05/22/09/26/0527531.jpg"},
     {id:11 ,name : null,rating : null, genres: [null],uri : null},
   ]
+
+
   
-  
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -264,10 +312,8 @@ export default function App() {
       scrollEventThrottle={16}
       renderItem={({item, index}) => {
 
-        const opacity = new Animated.Value(0);
-        const scale = new Animated.Value(0);
-         const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
-        const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
+
+       
 
 
         const genres = item.genres.map(genre => {
@@ -289,23 +335,21 @@ export default function App() {
           outputRange:[0, -50, 0],
           
         })
-        const rotate = scrollx.interpolate({
+          const rotate = scrollx.interpolate({
           inputRange:[
             (index - 2) * (ITEM_SIZE + 22),
             (index - 1) * (ITEM_SIZE + 22),
           ],
           outputRange:['-180deg', '0deg']
         })
-        // const [pressed, setpressed] = useState(false)
-        // useEffect(() => {
-          
-        //     // Animated.spring(scale, {
-        //     //   tovalue: 1,
-        //     //   useNativeDriver: false
-        //     // }).start()   
-        //   alert('fdsfs')
-        // });
-      
+
+        
+        const conditionHandler = (id) =>{
+          if(id == counter){
+          return true
+        }
+        }
+        
 
         if (!item.uri) {
           return(<View style={{ width: SPACING_SIZE,  }} />)
@@ -313,10 +357,31 @@ export default function App() {
 
         return(
           <View
-
+            
           >
             
             <Animated.View 
+            onTouchStart={()=> {
+                setcounter(item.id);
+              Animated.parallel([
+                Animated.spring(scale, {
+                toValue: 1.2,
+                useNativeDriver: false
+              }),
+              Animated.spring(opacity, {
+                toValue: 0.8,
+                useNativeDriver: false
+              }),
+              ]).start(() =>
+                Animated.spring(scale, {
+                  toValue: 1,
+                  duration: 100,
+                  useNativeDriver: false
+                }).start()
+              )
+              
+            }}
+
             style={{ 
             width: ITEM_SIZE, 
             height: ITEM_HEIGHT, 
@@ -330,8 +395,7 @@ export default function App() {
             
             <Image 
             source={{ uri : item.uri }}
-            onPress={() => alert('fuuuuuuuuck')}
-
+            
             style={{ 
               width:width_image, 
               height: height_image, 
@@ -340,21 +404,23 @@ export default function App() {
               
             }}
             />
-
-            <AnimatedIcon 
+        
+           <AnimatedIcon 
             name="playcircleo" 
             size={50} 
             color="#ffe6ec" 
-            style={{ position: 'absolute',  zIndex: 10, bottom: 200, 
-            transform:[{scale}]
-          }}  
-
+            style={ (item.id === counter) ? [{transform:[{scale}], opacity ,position: 'absolute',  zIndex: 10, bottom: 200,},] : [{  position: 'absolute',  zIndex: 10, bottom: 200,
+            opacity: 0,
+            
+          }]}  
             />
-            <LinearGradient 
+            <AnimatedLinearGradient 
             colors={['transparent' , '#33000c']}
-            style={{ width: width_image, height: height_image, position: 'absolute', bottom: 132, borderRadius: 30,
-            // opacity
-            }}
+            style={(item.id === counter) ? [{ width: width_image, height: height_image, position: 'absolute', bottom: 132, borderRadius: 30,
+            opacity ,
+            }] : [{ width: width_image, height: height_image, position: 'absolute', bottom: 132, borderRadius: 30,
+            opacity: 0.5
+            }]}
             />
 
 
