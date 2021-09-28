@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useState } from 'react';
 import { Animated, useWindowDimensions } from 'react-native';
 import {
     StyleSheet,
@@ -14,8 +14,12 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg from 'react-native-svg';
 import { Rect } from 'react-native-svg';
+import { AntDesign } from '@expo/vector-icons'; 
+import { TouchableHighlight } from 'react-native';
+import { useEffect } from 'react';
 
-const AnimatedSvg =  Animated.createAnimatedComponent(Svg)
+
+
 const AnimatedImage = Animated.createAnimatedComponent((Image))
 
 const {width , height} = Dimensions.get('window');
@@ -28,7 +32,7 @@ const SPACING_SIZE = (width - ITEM_SIZE) / 2;
 
 const BG ='#ff1a53';
 const ITEM ='transparent';
-
+const LOGO  = 'https://cdn.pngsumo.com/netflix-logo-icon-of-flat-style-available-in-svg-png-eps-ai-netflix-icon-png-256_256.png';
 
 const BackDrop = ({scrollx}) => {
       
@@ -88,10 +92,18 @@ const BackDrop = ({scrollx}) => {
                 outputRange: [-width, 0],
                 
               });
-
-                
+                // const rotate = Animated.Value("0deg");
+              
+              const rotate = scrollx.interpolate({
+                inputRange,
+                outputRange:['-180deg', '0deg']
+              })
+              const new_item = ITEM_SIZE +22
+              
+            
               
               return(
+                <View style={{ width, height: height * 1.1, position: 'absolute' }}>
                 <Animated.View 
                 removeClippedSubviews={false}
                 style={{
@@ -104,13 +116,55 @@ const BackDrop = ({scrollx}) => {
                   source={{ uri : item.uri}}
                   style={{ width, height: HEIGHT_BACKDROP ,position: 'absolute', resizeMode: 'cover' }}
                   />
-                </Animated.View> 
+                </Animated.View>
+                <View style={{ 
+                  position: 'absolute', 
+                  width, 
+                  height : height* 0.4, 
+                  bottom: 0, 
+                  
+                  }}>
+                    <AntDesign 
+                    name="stepbackward" 
+                    size={40} 
+                    color="white"
+                    style={{ bottom: 65, left: 50 , position: 'absolute'}}
+                    />
+                  <AnimatedImage 
+                source={{ uri : LOGO }}
+                style={{ 
+                  position: 'absolute', 
+                  width: 110, 
+                  height: 110, 
+                  bottom: 30, 
+                  right: width/2 -56,
+                  transform: [
+                    {rotate},
+                    
+                  ],
+                  
+                }}
+                />
+                <AntDesign 
+                name="stepforward" 
+                size={40} 
+                color="white"
+                style={{ bottom: 65, right: 50 , position: 'absolute'}}
+                />
+                <LinearGradient
+                    colors={['transparent', BG]}
+                    style={{ width, height: HEIGHT_BACKDROP * 2.3, position: 'absolute',   }}
+                    />
+                </View>
+                </View>
               )
               })}
             <LinearGradient 
             colors={['transparent', BG]}
               style={{ width, height: HEIGHT_BACKDROP  }}
             />
+            
+            
       </View>
 )
 }
@@ -210,6 +264,12 @@ export default function App() {
       scrollEventThrottle={16}
       renderItem={({item, index}) => {
 
+        const opacity = new Animated.Value(0);
+        const scale = new Animated.Value(0);
+         const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+        const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
+
+
         const genres = item.genres.map(genre => {
           return(
             <View style={{ borderRadius: 10, borderWidth:0.5 , maxWidth: 65, paddingHorizontal: 5, paddingVertical :3, alignItems: 'center', borderColor: "#ffe6ec", margin: 4 }} >
@@ -229,18 +289,35 @@ export default function App() {
           outputRange:[0, -50, 0],
           
         })
-        
+        const rotate = scrollx.interpolate({
+          inputRange:[
+            (index - 2) * (ITEM_SIZE + 22),
+            (index - 1) * (ITEM_SIZE + 22),
+          ],
+          outputRange:['-180deg', '0deg']
+        })
+        // const [pressed, setpressed] = useState(false)
+        // useEffect(() => {
+          
+        //     // Animated.spring(scale, {
+        //     //   tovalue: 1,
+        //     //   useNativeDriver: false
+        //     // }).start()   
+        //   alert('fdsfs')
+        // });
+      
 
         if (!item.uri) {
           return(<View style={{ width: SPACING_SIZE,  }} />)
         }
 
-        
-
         return(
-          <View>
+          <View
+
+          >
             
-            <Animated.View style={{ 
+            <Animated.View 
+            style={{ 
             width: ITEM_SIZE, 
             height: ITEM_HEIGHT, 
             margin: 11,
@@ -253,7 +330,8 @@ export default function App() {
             
             <Image 
             source={{ uri : item.uri }}
-            
+            onPress={() => alert('fuuuuuuuuck')}
+
             style={{ 
               width:width_image, 
               height: height_image, 
@@ -262,7 +340,24 @@ export default function App() {
               
             }}
             />
-            
+
+            <AnimatedIcon 
+            name="playcircleo" 
+            size={50} 
+            color="#ffe6ec" 
+            style={{ position: 'absolute',  zIndex: 10, bottom: 200, 
+            transform:[{scale}]
+          }}  
+
+            />
+            <LinearGradient 
+            colors={['transparent' , '#33000c']}
+            style={{ width: width_image, height: height_image, position: 'absolute', bottom: 132, borderRadius: 30,
+            // opacity
+            }}
+            />
+
+
             <View style={{ alignItems: 'center', marginTop: 8,}}>
               <Text
               style={{ 
